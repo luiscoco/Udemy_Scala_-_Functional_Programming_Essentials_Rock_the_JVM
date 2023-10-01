@@ -68,10 +68,16 @@
 
 32. Tuples and Maps.
 
-33. Options.
+33. Tuples and Maps (execises).
 
-34. Handling Failure.
+34. Options.
+
+35. Handling Failure.
 
 ## Pattern Matching
 
+36. Pattern Matching.
 
+37. All the patterns.
+
+38. Scala 3: braceless syntax.
