@@ -1,5 +1,9 @@
 # Udemy Scala &amp; Functional Programming Essentials | Rock the JVM
 
+https://superruzafa.github.io/visual-scala-reference/
+
+
+
 # The Absolute Scala Basics
 
 ### 1. Values, Variables and Types.
@@ -2338,7 +2342,7 @@ object PatternsEverywhere {
 
 ## 39. Scala 3: braceless syntax.
 
-```
+```scala
 package com.rockthejvm.part4power
 
 object BracelessSyntax {
