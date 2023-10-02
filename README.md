@@ -358,15 +358,85 @@ object CBNvsCBV {
 
 ## 7. Default and Named Arguments.
 
+```scala
+package com.rockthejvm.part1basics
 
+import scala.annotation.tailrec
+
+object DefaultArgs {
+
+  @tailrec
+  def sumUntilTailrec(x: Int, accumulator: Int = 0): Int =
+    if (x <= 0) accumulator
+    else sumUntilTailrec(x - 1, accumulator + x)
+
+  val sumUntil100 = sumUntilTailrec(100) // additional arg passed automatically
+
+  // when you use a function most of the time with the same value = default arguments
+  def savePicture(dirPath: String, name: String, format: String = "jpg", width: Int = 1920, height: Int = 1080): Unit =
+    println("Saving picture in format " + format + " in path " + dirPath)
+
+
+  def main(args: Array[String]): Unit = {
+    // default args are injected
+    savePicture("/users/daniel/photos", "myphoto")
+    // pass explicit different values for default args
+    savePicture("/users/daniel/photos", "myphoto", "png")
+    // pass values after the default argument
+    savePicture("/users/daniel/photos", "myphoto", width = 800, height = 600)
+    // naming arguments allow passing in a different order
+    savePicture("/users/daniel/photos", "myphoto", height = 600, width = 800)
+  }
+}
+```
 
 ## 8. Smart Operations and Strings.
 
+```scala
+package com.rockthejvm.part1basics
 
+object StringOps {
 
-## Object-Oriented Programming in Sala
+  val aString: String = "Hello, I am learning Scala"
 
+  // string functions
+  val secondChar = aString.charAt(1)
+  val firstWord = aString.substring(0, 5) // "Hello"
+  val words = aString.split(" ") // Array("Hello,", "I", "am", "learning", "Scala")
+  val startsWithHello = aString.startsWith("Hello") // true
+  val allDashes = aString.replace(' ', '-')
+  val allUppercase = aString.toUpperCase() // also toLowerCase()
+  val nChars = aString.length
 
+  // other functions
+  val reversed = aString.reverse
+  val aBunchOfChars = aString.take(10)
+
+  // parse to numeric
+  val numberAsString = "2"
+  val number = numberAsString.toInt
+
+  // s-interpolation
+  val name = "Alice"
+  val age = 12
+  val greeting = "Hello, I'm " + name + " and I am " + age + "years old."
+  val greeting_v2 = s"Hello, I'm $name and I'm $age years old."
+  val greeting_v3 = s"Hello, I'm $name and I will be turning ${age + 1} years old."
+
+  // f-interpolation
+  val speed = 1.2f
+  val myth = f"$name can eat $speed%2.5f burgers per minute."
+
+  // raw-interpolation
+  val escapes = raw"This is a \n newline"
+
+  def main(args: Array[String]): Unit = {
+    println(escapes)
+  }
+}
+```
+
+## Object-Oriented Programming in Scala
 
 10. Object-Oriented Basics.
 
