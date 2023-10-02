@@ -1420,21 +1420,214 @@ object AnonymousFunctions {
 }
 ```
 
-
-
 ## 27. Higher-Order-Functions and Curries.
 
+```scala
+package com.rockthejvm.part3fp
 
+import scala.annotation.tailrec
+
+object HOFsCurrying {
+
+  // higher order functions (HOFs)
+  val aHof: (Int, (Int => Int)) => Int = (x, func) => x + 1
+  val anotherHof: Int => (Int => Int) = x => (y => y + 2 * x)
+
+  // quick exercise
+  val superfunction: (Int, (String, (Int => Boolean)) => Int) => (Int => Int) = (x, func) => (y => x + y)
+
+  // examples: map, flatMap, filter
+
+  // more examples
+  // f(f(f(...(f(x)))
+  @tailrec
+  def nTimes(f: Int => Int, n: Int, x: Int): Int =
+    if (n <= 0) x
+    else nTimes(f, n-1, f(x))
+
+  val plusOne = (x: Int) => x + 1
+  val tenThousand = nTimes(plusOne, 10000, 0)
+
+  /*
+    ntv2(po, 3) =
+    (x: Int) => ntv2(po, 2)(po(x)) = po(po(po(x)))
+
+    ntv2(po, 2) =
+    (x: Int) => ntv2(po, 1)(po(x)) = po(po(x))
+
+    ntv2(po, 1) =>
+    (x: Int) => ntv2(po, 0)(po(x)) = po(x)
+
+    ntv2(po, 0) = (x: Int) => x
+   */
+  def nTimes_v2(f: Int => Int, n: Int): Int => Int =
+    if (n <= 0) (x: Int) => x
+    else (x: Int) => nTimes_v2(f, n-1)(f(x))
+
+  val plusOneHundred = nTimes_v2(plusOne, 100) // po(po(po(po... risks SO if the arg is too big
+  val oneHundred = plusOneHundred(0)
+
+  // currying = HOFs returning function instances
+  val superAdder: Int => Int => Int = (x: Int) => (y: Int) => x + y
+  val add3: Int => Int = superAdder(3)
+  val invokeSuperAdder = superAdder(3)(100) // 103
+
+  // curried methods = methods with multiple arg list
+  def curriedFormatter(fmt: String)(x: Double): String = fmt.format(x)
+
+  val standardFormat: (Double => String) = curriedFormatter("%4.2f") // (x: Double) => "%4.2f".format(x)
+  val preciseFormat: (Double => String) = curriedFormatter("%10.8f") // (x: Double) => "%10.8f".format(x)
+
+  /**
+   * 1. LList exercises
+   *    - foreach(A => Unit): Unit
+   *      [1,2,3].foreach(x => println(x))
+   *
+   *    - sort((A, A) => Int): LList[A]
+   *      [3,2,4,1].sort((x, y) => x - y) = [1,2,3,4]
+   *      (hint: use insertion sort)
+   *
+   *    - zipWith[B](LList[A], (A, A) => B): LList[B]
+   *      [1,2,3].zipWith([4,5,6], x * y) => [1 * 4, 2 * 5, 3 * 6] = [4, 10, 18]
+   *
+   *    - foldLeft[B](start: B)((A, B) => B): B
+   *      [1,2,3,4].foldLeft[Int](0)(x + y) = 10
+   *      0 + 1 = 1
+   *      1 + 2 = 3
+   *      3 + 3 = 6
+   *      6 + 4 = 10
+   *
+   *  2. toCurry(f: (Int, Int) => Int): Int => Int => Int
+   *     fromCurry(f: (Int => Int => Int)): (Int, Int) => Int
+   *
+   *  3. compose(f,g) => x => f(g(x))
+   *     andThen(f,g) => x => g(f(x))
+   */
+
+  // 2
+  def toCurry[A, B, C](f: (A, B) => C): A => B => C =
+    x => y => f(x, y)
+
+  val superAdder_v2 = toCurry[Int, Int, Int](_ + _) // same as superAdder
+
+  def fromCurry[A, B, C](f: A => B => C): (A, B) => C =
+    (x, y) => f(x)(y)
+
+  val simpleAdder = fromCurry(superAdder)
+
+  // 3
+  def compose[A, B, C](f: B => C, g: A => B): A => C =
+    x => f(g(x))
+
+  def andThen[A, B, C](f: A => B, g: B => C): A => C =
+    x => g(f(x))
+
+  val incrementer = (x: Int) => x + 1
+  val doubler = (x: Int) => 2 * x
+  val composedApplication = compose(incrementer, doubler)
+  val aSequencedApplication = andThen(incrementer, doubler)
+
+  def main(args: Array[String]): Unit = {
+    println(tenThousand)
+    println(oneHundred)
+    println(standardFormat(Math.PI))
+    println(preciseFormat(Math.PI))
+    println(simpleAdder(2,78)) // 80
+    println(composedApplication(14)) // 29 = 2 * 14 + 1
+    println(aSequencedApplication(14)) // 30 = (14 + 1) * 2
+
+
+  }
+}
+```
 
 ## 28. HOFs and Curries (exercises).
 
-
-
-
 ## 29. map, flatMap, filter and for-comprehensions.
 
+```scala
+package com.rockthejvm.part3fp
 
+object MapFlatMapFilterFor {
 
+  // standard list
+  val aList = List(1,2,3) // [1] -> [2] -> [3] -> Nil // [1,2,3]
+  val firstElement = aList.head
+  val restOfElements = aList.tail
+
+  // map
+  val anIncrementedList = aList.map(_ + 1)
+
+  // filter
+  val onlyOddNumbers = aList.filter(_ % 2 != 0)
+
+  // flatMap
+  val toPair = (x: Int) => List(x, x + 1)
+  val aFlatMappedList = aList.flatMap(toPair) // [1,2,2,3,3,4]
+
+  // All the possible combinations of all the elements of those lists, in the format "1a - black"
+  val numbers = List(1, 2, 3, 4)
+  val chars = List('a', 'b', 'c', 'd')
+  val colors = List("black", "white", "red")
+
+  /*
+    lambda = num => chars.map(char => s"$num$char")
+    [1,2,3,4].flatMap(lambda) = ["1a", "1b", "1c", "1d", "2a", "2b", "2c", "2d", ...]
+    lambda(1) = chars.map(char => s"1$char") = ["1a", "1b", "1c", "1d"]
+    lambda(2) = .. = ["2a", "2b", "2c", "2d"]
+    lambda(3) = ..
+    lambda(4) = ..
+   */
+  val combinations = numbers.withFilter(_ % 2 == 0).flatMap(number => chars.flatMap(char => colors.map(color => s"$number$char - $color")))
+
+  // for-comprehension = IDENTICAL to flatMap + map chains
+  val combinationsFor = for {
+    number <- numbers if number % 2 == 0 // generator
+    char <- chars
+    color <- colors
+  } yield s"$number$char - $color" // an EXPRESSION
+
+  // for-comprehensions with Unit
+  // if foreach
+
+  /**
+   * Exercises
+   * 1. LList supports for comprehensions?
+   * 2. A small collection of AT MOST ONE element - Maybe[A]
+   *  - map
+   *  - flatMap
+   *  - filter
+   */
+  import com.rockthejvm.practice.*
+  val lSimpleNumbers: LList[Int] = Cons(1, Cons(2, Cons(3, Empty())))
+  // map, flatMap, filter
+  val incrementedNumbers = lSimpleNumbers.map(_ + 1)
+  val filteredNumbers = lSimpleNumbers.filter(_ % 2 == 0)
+  val toPairLList: Int => LList[Int] = (x: Int) => Cons(x, Cons(x + 1, Empty()))
+  val flatMappedNumbers = lSimpleNumbers.flatMap(toPairLList)
+
+  // map + flatMap = for comprehensions
+  val combinationNumbers = for {
+    number <- lSimpleNumbers if number % 2 == 0
+    char <- Cons('a', Cons('b', Cons('c', Empty())))
+  } yield s"$number-$char"
+
+  def main(args: Array[String]): Unit = {
+    numbers.foreach(println)
+    for {
+      num <- numbers
+    } println(num)
+
+    println(combinations)
+    println(combinationsFor)
+
+    println(incrementedNumbers)
+    println(filteredNumbers)
+    println(flatMappedNumbers)
+    println(combinationNumbers)
+  }
+}
+```
 
 ## 30. A Collections Overview.
 
@@ -1443,12 +1636,197 @@ object AnonymousFunctions {
 
 ## 31. Sequences: List, Array, Vector.
 
+```scala
+package com.rockthejvm.part3fp
 
+import scala.util.Random
 
+object LinearCollections {
+
+  // Seq = well-defined ordering + indexing
+  def testSeq(): Unit = {
+    val aSequence = Seq(4,2,3,1)
+    // main API: index an element
+    val thirdElement = aSequence.apply(2) // element 3
+    // map/flatMap/filter/for
+    val anIncrementedSequence = aSequence.map(_ + 1) // [5,3,4,2]
+    val aFlatMappedSequence = aSequence.flatMap(x => Seq(x, x + 1)) // [4,5,2,3,3,4,1,2]
+    val aFilteredSequence = aSequence.filter(_ % 2 == 0) // [4,2]
+    // other methods
+    val reversed = aSequence.reverse
+    val concatenation = aSequence ++ Seq(5,6,7)
+    val sortedSequence = aSequence.sorted // [1,2,3,4]
+    val sum = aSequence.foldLeft(0)(_ + _) // 10
+    val stringRep = aSequence.mkString("[", ",", "]")
+
+    println(aSequence)
+    println(concatenation)
+    println(sortedSequence)
+  }
+
+  // lists
+  def testLists(): Unit = {
+    val aList = List(1,2,3)
+    // same API as Seq
+    val firstElement = aList.head
+    val rest = aList.tail
+    // appending and prepending
+    val aBiggerList = 0 +: aList :+ 4
+    val prepending = 0 :: aList // :: equivalent to Cons in our LList
+    // utility methods
+    val scalax5 = List.fill(5)("Scala")
+  }
+
+  // ranges
+  def testRanges(): Unit = {
+    val aRange = 1 to 10
+    val aNonInclusiveRange = 1 until 10 // 10 not included
+    // same Seq API
+    (1 to 10).foreach(_ => println("Scala"))
+  }
+
+  // arrays
+  def testArrays(): Unit = {
+    val anArray = Array(1,2,3,4,5,6) // int[] on the JVM
+    // most Seq APIs
+    // arrays are not Seqs
+    val aSequence: Seq[Int] = anArray.toIndexedSeq
+    // arrays are mutable
+    anArray.update(2, 30) // no new array is allocated
+  }
+
+  // vectors = fast Seqs for a large amount of data
+  def testVectors(): Unit = {
+    val aVector: Vector[Int] = Vector(1,2,3,4,5,6)
+    // the same Seq API
+  }
+
+  def smallBenchmark(): Unit = {
+    val maxRuns = 1000
+    val maxCapacity = 1000000
+
+    def getWriteTime(collection: Seq[Int]): Double = {
+      val random = new Random()
+      val times = for {
+        i <- 1 to maxRuns
+      } yield {
+        val index = random.nextInt(maxCapacity)
+        val element = random.nextInt()
+
+        val currentTime = System.nanoTime()
+        val updatedCollection = collection.updated(index, element)
+        System.nanoTime() - currentTime
+      }
+
+      // compute average
+      times.sum * 1.0 / maxRuns
+    }
+
+    val numbersList = (1 to maxCapacity).toList
+    val numbersVector = (1 to maxCapacity).toVector
+
+    println(getWriteTime(numbersList))
+    println(getWriteTime(numbersVector))
+  }
+
+  // sets
+  def testSets(): Unit = {
+    val aSet = Set(1,2,3,4,5,4) // no ordering guaranteed
+    // equals + hashCode = hash set
+    // main API: test if in the set
+    val contains3 = aSet.contains(3) // true
+    val contains3_v2 = aSet(3) // same: true
+    // adding/removing
+    val aBiggerSet = aSet + 4 // [1,2,3,4,5]
+    val aSmallerSet = aSet - 4 // [1,2,3,5]
+    // concatenation == union
+    val anotherSet = Set(4,5,6,7,8)
+    val muchBiggerSet = aSet.union(anotherSet)
+    val muchBiggerSet_v2 = aSet ++ anotherSet // same
+    val muchBiggerSet_v3 = aSet | anotherSet // same
+    // difference
+    val aDiffSet = aSet.diff(anotherSet)
+    val aDiffSet_v2 = aSet -- anotherSet // same
+    // intersection
+    val anIntersection = aSet.intersect(anotherSet) // [4,5]
+    val anIntersection_v2 = aSet & anotherSet // same
+  }
+
+  def main(args: Array[String]): Unit = {
+    smallBenchmark()
+  }
+}
+```
 
 ## 32. Tuples and Maps.
 
+```scala
+package com.rockthejvm.part3fp
 
+object TuplesMaps {
+
+  // tuples = finite ordered "lists" / group of values under the same "big" value
+  val aTuple = (2, "rock the jvm") // Tuple2[Int, String] == (Int, String)
+  val firstField = aTuple._1
+  val aCopiedTuple = aTuple.copy(_1 = 54)
+
+  // tuples of 2 elements
+  val aTuple_v2 = 2 -> "rock the jvm" // IDENTICAL to (2, "rock the jvm")
+
+  // maps: keys -> values
+  val aMap = Map()
+
+  val phonebook: Map[String, Int] = Map(
+    "Jim" -> 555,
+    "Daniel" -> 789,
+    "Jane" -> 123
+  ).withDefaultValue(-1)
+
+  // core APIs
+  val phonebookHasDaniel = phonebook.contains("Daniel")
+  val marysPhoneNumber = phonebook("Mary") // crash with an exception
+
+  // add a pair
+  val newPair = "Mary" -> 678
+  val newPhonebook = phonebook + newPair // new map
+
+  // remove a key
+  val phoneBookWithoutDaniel = phonebook - "Daniel" // new map
+
+  // list -> map
+  val linearPhonebook = List(
+    "Jim" -> 555,
+    "Daniel" -> 789,
+    "Jane" -> 123
+  )
+  val phonebook_v2 = linearPhonebook.toMap
+
+  // map -> linear collection
+  val linearPhonebook_v2 = phonebook.toList // toSeq, toVector, toArray, toSet
+
+  // map, flatMap, filter
+  // Map("Jim" -> 123, "jiM" -> 999) => Map("JIM" -> ????)
+  val aProcessedPhonebook = phonebook.map(pair => (pair._1.toUpperCase(), pair._2))
+
+  // filtering keys
+  val noJs = phonebook.view.filterKeys(!_.startsWith("J")).toMap
+
+  // mapping values
+  val prefixNumbers = phonebook.view.mapValues(number => s"0255-$number").toMap
+
+  // other collections can create maps
+  val names = List("Bob", "James", "Angela", "Mary", "Daniel", "Jim")
+  val nameGroupings = names.groupBy(name => name.charAt(0)) // Map[Char, List[String]]
+
+
+  def main(args: Array[String]): Unit = {
+    println(phonebook)
+    println(phonebookHasDaniel)
+    println(marysPhoneNumber)
+    println(nameGroupings)
+  }
+}
+```
 
 
 ## 33. Tuples and Maps (execises).
