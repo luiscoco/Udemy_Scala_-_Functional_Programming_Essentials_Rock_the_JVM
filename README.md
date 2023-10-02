@@ -1290,63 +1290,63 @@ object PhysicsConstants {
 
 
 
-27. Higher-Order-Functions and Curries.
+## 27. Higher-Order-Functions and Curries.
 
 
 
-28. HOFs and Curries (exercises).
-
-
-
-
-29. map, flatMap, filter and for-comprehensions.
+## 28. HOFs and Curries (exercises).
 
 
 
 
-30. A Collections Overview.
+## 29. map, flatMap, filter and for-comprehensions.
 
 
 
 
-31. Sequences: List, Array, Vector.
+## 30. A Collections Overview.
 
 
 
 
-32. Tuples and Maps.
+## 31. Sequences: List, Array, Vector.
 
 
 
 
-33. Tuples and Maps (execises).
+## 32. Tuples and Maps.
 
 
 
 
-34. Options.
+## 33. Tuples and Maps (execises).
 
 
 
 
-35. Handling Failure.
+## 34. Options.
+
+
+
+
+## 35. Handling Failure.
 
 
 
 
 ## Pattern Matching
-
-36. Pattern Matching.
-
-
-
-
-37. All the patterns.
+ 
+## 36. Pattern Matching.
 
 
 
 
+## 37. All the patterns.
 
-38. Scala 3: braceless syntax.
+
+
+
+
+## 38. Scala 3: braceless syntax.
 
 
