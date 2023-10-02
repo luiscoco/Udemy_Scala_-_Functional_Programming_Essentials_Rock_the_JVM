@@ -1016,22 +1016,268 @@ object AnonymousClasses {
 
 ## 21. Case Classes.
 
+```scala
+package com.rockthejvm.part2oop
 
+object CaseClasses {
+
+  // lightweight data structures
+  case class Person(name: String, age: Int) {
+    // do some other stuff
+  }
+
+  // 1 - class args are now fields
+  val daniel = new Person("Daniel", 99)
+  val danielsAge = daniel.age
+
+  // 2 - toString, equals and hashCode
+  val danielToString = daniel.toString // Person("Daniel", 99)
+  val danielDuped = new Person("Daniel", 99)
+  val isSameDaniel = daniel == danielDuped // true
+
+  // 3 - utility methods
+  val danielYounger = daniel.copy(age = 78) // new Person("Daniel", 78)
+
+  // 4 - CCs have companion objects
+  val thePersonSingleton = Person
+  val daniel_v2 = Person("Daniel", 99) // "constructor"
+
+  // 5 - CCs are serializable
+  // use-case: Akka
+
+  // 6 - CCs have extractor patterns for PATTERN MATCHING
+
+  // can't create CCs with no arg lists
+  /*
+    case class CCWithNoArgs {
+      // some code
+    }
+
+    val ccna = new CCWithNoArgs
+    val ccna_v2 = new CCWithNoArgs // all instances would be equal!
+  */
+
+  case object UnitedKingdom {
+    // fields and methods
+    def name: String = "The UK of GB and NI"
+  }
+
+  case class CCWithArgListNoArgs[A]() // legal, mainly used in the context of generics
+
+  /**
+   * Exercise: use case classes for LList.
+   */
+
+  def main(args: Array[String]): Unit = {
+    println(daniel)
+    println(isSameDaniel)
+  }
+}
+```
 
 
 ## 22. Scala 3: Enums.
 
+```scala
+package com.rockthejvm.part2oop
 
+object Enums {
+
+  enum Permissions {
+    case READ, WRITE, EXECUTE, NONE
+
+    // add fields/methods
+    def openDocument(): Unit =
+      if (this == READ) println("opening document...")
+      else println("reading not allowed.")
+  }
+
+  val somePermissions: Permissions = Permissions.READ
+
+  // constructor args
+  enum PermissionsWithBits(bits: Int) {
+    case READ extends PermissionsWithBits(4) // 100
+    case WRITE extends PermissionsWithBits(2) // 010
+    case EXECUTE extends PermissionsWithBits(1) // 001
+    case NONE extends PermissionsWithBits(0) // 000
+  }
+
+  object PermissionsWithBits {
+    def fromBits(bits: Int): PermissionsWithBits = // whatever
+      PermissionsWithBits.NONE
+  }
+
+  // standard API
+  val somePermissionsOrdinal = somePermissions.ordinal
+  val allPermissions = PermissionsWithBits.values // array of all possible values of the enum
+  val readPermission: Permissions = Permissions.valueOf("READ") // Permissions.READ
+
+  def main(args: Array[String]): Unit = {
+    somePermissions.openDocument()
+    println(somePermissionsOrdinal)
+  }
+}
+```
 
 
 ## 23. Exceptions.
 
+```scala
+package com.rockthejvm.part2oop
 
+object Exceptions {
+
+  val aString: String = null
+  // aString.length crashes with a NPE
+
+  // 1 - throw exceptions
+  // val aWeirdValue: Int = throw new NullPointerException // returns Nothing
+
+  // Exception hieararchy:
+  //
+  // Throwable:
+  //    Error, e.g. SOError, OOMError
+  //    Exception, e.g. NPException, NSEException, ....
+
+  def getInt(withExceptions: Boolean): Int =
+    if (withExceptions) throw new RuntimeException("No int for you!")
+    else 42
+
+  // 2 - catch exceptions
+  val potentialFail = try {
+    // code that might fail
+    getInt(true) // an Int
+  } catch {
+    // most specific exceptions first
+    case e: NullPointerException => 35
+    case e: RuntimeException => 54 // an Int
+    // ...
+  } finally {
+    // executed no matter what
+    // closing resources
+    // Unit here
+  }
+
+  // 3 - custom exceptions
+  class MyException extends RuntimeException {
+    // fields or methods
+    override def getMessage = "MY EXCEPTION"
+  }
+
+  val myException = new MyException
+
+  /**
+   * Exercises:
+   *
+   * 1. Crash with SOError
+   * 2. Crash with OOMError
+   * 3. Find an element matching a predicate in LList
+   */
+
+  def soCrash(): Unit = {
+    def infinite(): Int = 1 + infinite()
+    infinite()
+  }
+
+  def oomCrash(): Unit = {
+    def bigString(n: Int, acc: String): String =
+      if (n == 0) acc
+      else bigString(n - 1, acc + acc)
+
+    bigString(56175363, "Scala")
+  }
+
+
+  def main(args: Array[String]): Unit = {
+    println(potentialFail)
+    // val throwingMyException = throw myException
+
+    // soCrash()
+    oomCrash()
+  }
+}
+```
 
 
 ## 24. Packing and Imports.
 
+```scala
+package com.rockthejvm.part2oop
 
+import scala.collection.SortedSet
+
+// can define values and methods top-level
+// they will be included in a synthetic object
+// can be imported via an mypackage.* import
+val meaningOfLife = 42
+def computeMyLife: String = "Scala"
+
+object PackagesImports { // top-level definition
+  // packages = form of organization of definitions, similar to a folder structure in a normal file system
+
+  // fully qualified name
+  val aList: com.rockthejvm.practice.LList[Int] = ??? // throws NotImplementedError
+
+  // import
+  import com.rockthejvm.practice.LList
+  val anotherList: LList[Int] = ???
+
+  // importing under an alias
+  import java.util.{List as JList}
+  val aJavaList: JList[Int] = ???
+
+  // import everything
+  import com.rockthejvm.practice.*
+  val aPredicate: Cons[Int] = ???
+
+  // import multiple symbols
+  import PhysicsConstants.{SPEED_OF_LIGHT, EARTH_GRAVITY}
+  val c = SPEED_OF_LIGHT
+
+  // import everything EXCEPT something
+  object PlayingPhysics {
+    import PhysicsConstants.{PLANCK as _, *}
+    // val plank = PLANK // will not work
+  }
+
+  import com.rockthejvm.part2oop.* // import the mol and computeMyLife
+  val mol = meaningOfLife
+
+  // default imports:
+  // scala.*, scala.Predef.*, java.lang.*
+
+  // exports
+  class PhysicsCalculator {
+    import PhysicsConstants.*
+    def computePhotonEnergy(wavelength: Double): Double =
+      PLANCK / wavelength
+  }
+
+  object ScienceApp {
+    val physicsCalculator = new PhysicsCalculator
+
+    // exports create aliases for fields/methods to use locally
+    export physicsCalculator.computePhotonEnergy
+
+    def computeEquivalentMass(wavelength: Double): Double =
+      computePhotonEnergy(wavelength) / (SPEED_OF_LIGHT * SPEED_OF_LIGHT)
+      // ^^ the computePhotonEnergy method can be used directly (instead of physicsCalculator.computePhotonEnergy)
+      // useful especially when these uses are repeated
+  }
+
+  def main(args: Array[String]): Unit = {
+    // for testing
+  }
+}
+
+// usually organizing "utils" and constants in separate objects
+object PhysicsConstants {
+  // constants
+  val SPEED_OF_LIGHT = 299792458
+  val PLANCK = 6.62e-34 // scientific notation
+  val EARTH_GRAVITY = 9.8
+}
+```
 
 
 ## Functional Programming in Scala
