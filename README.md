@@ -2,7 +2,9 @@
 
 https://github.com/rockthejvm/scala-3-beginners
 
-https://superruzafa.github.io/visual-scala-reference/
+https://superruzafa.github.io/visual-scala-reference
+
+https://github.com/orgs/rockthejvm
 
 # The Absolute Scala Basics
 
