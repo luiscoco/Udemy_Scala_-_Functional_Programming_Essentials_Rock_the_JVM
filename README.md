@@ -2073,15 +2073,324 @@ object HandlingFailure {
  
 ## 36. Pattern Matching.
 
+```scala
+package com.rockthejvm.part4power
 
+import scala.util.Random
 
+object PatternMatching {
+
+  // switch on steroids
+  val random = new Random()
+  val aValue = random.nextInt(100)
+
+  val description = aValue match {
+    case 1 => "the first"
+    case 2 => "the second"
+    case 3 => "the third"
+    case _ => s"something else: $aValue"
+  }
+
+  // decompose values
+  case class Person(name: String, age: Int)
+  val bob = Person("Bob", 16)
+
+  val greeting = bob match {
+    case Person(n, a) if a < 18 => s"Hi, my name is $n and I'm $a years old."
+    case Person(n, a) => s"Hello there, my name is $n and I'm not allowed to say my age."
+    case _ => "I don't know who I am."
+  }
+
+  /*
+    Patterns are matched in order: put the most specific patterns first.
+    What if no cases match? MatchError
+    What's the type returned? The lowest common ancestor of all types on the RHS of each branch.
+   */
+
+  // PM on sealed hierarchies
+  sealed class Animal
+  case class Dog(breed: String) extends Animal
+  case class Cat(meowStyle: String) extends Animal
+
+  val anAnimal: Animal = Dog("Terra Nova")
+  val animalPM = anAnimal match {
+    case Dog(someBreed) => "I've detected a dog"
+    case Cat(meow) => "I've detected a cat"
+  }
+
+  /**
+   * Exercise
+   *  show(Sum(Number(2), Number(3))) = "2 + 3"
+   *  show(Sum(Sum(Number(2), Number(3)), Number(4)) = "2 + 3 + 4"
+   *  show(Prod(Sum(Number(2), Number(3)), Number(4))) = "(2 + 3) * 4"
+   *  show(Sum(Prod(Number(2), Number(3)), Number(4)) = "2 * 3 + 4"
+   */
+  sealed trait Expr
+  case class Number(n: Int) extends Expr
+  case class Sum(e1: Expr, e2: Expr) extends Expr
+  case class Prod(e1: Expr, e2: Expr) extends Expr
+
+  def show(expr: Expr): String = expr match {
+    case Number(n) => s"$n"
+    case Sum(left, right) => show(left) + " + " + show(right)
+    case Prod(left, right) => {
+      def maybeShowParentheses(exp: Expr) = exp match {
+        case Prod(_, _) => show(exp)
+        case Number(_) => show(exp)
+        case Sum(_, _) => s"(${show(exp)})"
+      }
+
+      maybeShowParentheses(left) + " * " + maybeShowParentheses(right)
+    }
+  }
+
+  def main(args: Array[String]): Unit = {
+    println(description)
+    println(greeting)
+
+    println(show(Sum(Number(2), Number(3))))
+    println(show(Sum(Sum(Number(2), Number(3)), Number(4))))
+    println(show(Prod(Sum(Number(2), Number(3)), Number(4))))
+    println(show(Sum(Prod(Number(2), Number(3)), Number(4))))
+  }
+}
+```
 
 ## 37. All the patterns.
 
+```scala
+package com.rockthejvm.part4power
 
+import com.rockthejvm.practice.*
 
+object AllThePatterns {
 
+  object MySingleton
+
+  // 1 - constants
+  val someValue: Any = "Scala"
+  val constants = someValue match {
+    case 42 => "a number"
+    case "Scala" => "THE Scala"
+    case true => "the truth"
+    case MySingleton => "a singleton object"
+  }
+
+  // 2 - match anything
+  val matchAnythingVar = 2 + 3 match {
+    case something => s"I've matched anything, it's $something"
+  }
+
+  val matchAnything = someValue match {
+    case _ => "I can match anything at all"
+  }
+
+  // 3 - tuples
+  val aTuple = (1,4)
+  val matchTuple = aTuple match {
+    case (1, somethingElse) => s"A tuple with 1 and $somethingElse"
+    case (something, 2) => "A tuple with 2 as its second field"
+  }
+
+  // PM structures can be NESTED
+
+  val nestedTuple = (1, (2, 3))
+  val matchNestedTuple = nestedTuple match {
+    case (_, (2, v)) => "A nested tuple ..."
+  }
+
+  // 4 - case classes
+  val aList: LList[Int] = Cons(1, Cons(2, Empty()))
+  val matchList = aList match {
+    case Empty() => "an empty list"
+    case Cons(head, Cons(_, tail)) => s"a non-empty list starting with $head"
+  }
+
+  val anOption: Option[Int] = Option(2)
+  val matchOption = anOption match {
+    case None => "an empty option"
+    case Some(value) => s"non-empty, got $value"
+  }
+
+  // 5 - list patterns
+  val aStandardList = List(1,2,3,42)
+  val matchStandardList = aStandardList match {
+    case List(1, _, _, _) => "list with 4 elements, first is 1"
+    case List(1, _*) => "list starting with 1"
+    case List(1, 2, _) :+ 42 => "list ending in 42"
+    case head :: tail => "deconstructed list"
+  }
+
+  // 6 - type specifiers
+  val unknown: Any = 2
+  val matchTyped = unknown match {
+    case anInt: Int => s"I matched an int, I can add 2 to it: ${anInt + 2}"
+    case aString: String => "I matched a String"
+    case _: Double => "I matched a double I don't care about"
+  }
+
+  // 7 - name binding
+  val bindingNames = aList match {
+    case Cons(head, rest @ Cons(_, tail)) => s"Can use $rest"
+  }
+
+  // 8 - chained patterns
+  val multiMatch = aList match {
+    case Empty() | Cons(0, _) => "an empty list to me"
+    case _ => "anything else"
+  }
+
+  // 9 - if guards
+  val secondElementSpecial = aList match {
+    case Cons(_, Cons(specialElement, _)) if specialElement > 5 => "second element is big enough"
+    case _ => "anything else"
+  }
+
+  /**
+    Example: does this make sense?
+   */
+  val aSimpleInt = 45
+  val isEven_bad = aSimpleInt match {
+    case n if n % 2 == 0 => true
+    case _ => false
+  }
+  // anti-pattern: convoluted, hard to read
+
+  // anti-pattern 2: if (condition) true else false
+  val isEven_bad_v2 = if (aSimpleInt % 2 == 0) true else false
+  // better - return the boolean expression, it has everything you need!
+  val isEven = aSimpleInt % 2 == 0
+
+  /**
+   * Exercise (trick)
+   */
+  val numbers: List[Int] = List(1,2,3,4)
+  val numbersMatch = numbers match {
+    case listOfStrings: List[String] => "a list of strings"
+    case listOfInts: List[Int] => "a list of numbers"
+  }
+
+  /*
+    PM runs at runtime
+    - reflection
+    - generic types are erased at runtime
+        List[String] => List
+        List[Int] => List
+        Function1[Int, String] => Function1
+        etc.
+   */
+
+  def main(args: Array[String]): Unit = {
+    println(numbersMatch)
+  }
+}
+```
 
 ## 38. Scala 3: braceless syntax.
 
+
+```
+package com.rockthejvm.part4power
+
+object BracelessSyntax {
+
+  // if - expressions
+  val anIfExpression = if (2 > 3) "bigger" else "smaller"
+
+  // java-style
+  val anIfExpression_v2 =
+    if (2 > 3) {
+      "bigger"
+    } else {
+      "smaller"
+    }
+
+  // compact
+  val anIfExpression_v3 =
+    if (2 > 3) "bigger"
+    else "smaller"
+
+  // scala 3
+  val anIfExpression_v4 =
+    if 2 > 3 then
+      "bigger" // higher indentation than the if part
+    else
+      "smaller"
+
+  val anIfExpression_v5 =
+    if 2 > 3 then
+      val result = "bigger"
+      result
+    else
+      val result = "smaller"
+      result
+
+  // scala 3 one-liner
+  val anIfExpression_v6 = if 2 > 3 then "bigger" else "smaller"
+
+  // for comprehensions
+  val aForComprehension = for {
+    n <- List(1,2,3)
+    s <- List("black", "white")
+  } yield s"$n$s"
+
+  // scala 3
+  val aForComprehension_v2 =
+    for
+      n <- List(1,2,3)
+      s <- List("black", "white")
+    yield s"$n$s"
+
+  // pattern matching
+  val meaningOfLife = 42
+  val aPatternMatch = meaningOfLife match {
+    case 1 => "the one"
+    case 2 => "double or nothing"
+    case _ => "something else"
+  }
+
+  // scala 3
+  val aPatternMatch_v2 =
+    meaningOfLife match
+      case 1 => "the one"
+      case 2 => "double or nothing"
+      case _ => "something else"
+
+  // methods without braces
+  def computeMeaningOfLife(arg: Int): Int = // significant indentation starts here - think of it like a phantom code block
+    val partialResult = 40
+
+
+
+
+
+    partialResult + 2 // still part of the method implementation!
+
+  // class definition with significant indentation (same for traits, objects, enums etc)
+  class Animal: // compiler expects the body of Animal
+    def eat(): Unit =
+      println("I'm eating")
+    end eat
+
+    def grow(): Unit =
+      println("I'm growing")
+
+    // 3000 more lines of code
+  end Animal // if, match, for, methods, classes, traits, enums, objects
+
+  // anonymous classes
+  val aSpecialAnimal = new Animal:
+    override def eat(): Unit = println("I'm special")
+
+  // indentation = strictly larger indentation
+  // 3 spaces + 2 tabs > 2 spaces + 2 tabs
+  // 3 spaces + 2 tabs > 3 spaces + 1 tab
+  // 3 tabs + 2 spaces ??? 2 tabs + 3 spaces
+
+
+  def main(args: Array[String]): Unit = {
+    println(computeMeaningOfLife(78))
+  }
+}
+```
 
