@@ -1,8 +1,8 @@
 # Udemy Scala &amp; Functional Programming Essentials | Rock the JVM
 
+https://github.com/rockthejvm/scala-3-beginners
+
 https://superruzafa.github.io/visual-scala-reference/
-
-
 
 # The Absolute Scala Basics
 
