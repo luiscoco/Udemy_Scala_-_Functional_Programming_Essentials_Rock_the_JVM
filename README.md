@@ -2286,8 +2286,57 @@ object AllThePatterns {
 }
 ```
 
-## 38. Scala 3: braceless syntax.
+## 38. Patterns Everywhere
 
+```scala
+package com.rockthejvm.part4power
+
+object PatternsEverywhere {
+
+  // big idea #1: catches are actually MATCHES
+  val potentialFailure = try {
+    // code
+  } catch {
+    case e: RuntimeException => "runtime ex"
+    case npe: NullPointerException => "npe"
+    case _ => "some other exception"
+  }
+
+  /*
+    try { .. code }
+    catch (e) {
+      e match {
+        case e: RuntimeException => "runtime ex"
+        case npe: NullPointerException => "npe"
+        case _ => "some other exception"
+      }
+    }
+   */
+
+  // big idea #2: for comprehensions (generators) are based on PM
+  val aList = List(1,2,3,4)
+  val evenNumbers = for {
+    n <- aList if n % 2 == 0
+  } yield 10 * n
+
+  val tuples = List((1,2), (3,4))
+  val filterTuples = for {
+    (first, second) <- tuples if first < 3
+  } yield second * 100
+
+  // big idea #3: new syntax (python-like)
+  val aTuple = (1,2,3)
+  val (a, b, c) = aTuple
+
+  val head :: tail = tuples
+
+  def main(args: Array[String]): Unit = {
+
+  }
+}
+```
+
+## 39. Scala 3: braceless syntax.
 
 ```
 package com.rockthejvm.part4power
@@ -2394,3 +2443,54 @@ object BracelessSyntax {
 }
 ```
 
+## Imperative programming
+
+```scala
+package com.rockthejvm.part4power
+
+object ImperativeProgramming {
+
+  val meaningOfLife: Int = 42
+
+  var aVariable = 99
+  aVariable = 100 // vars can be reassigned
+  // aVariable = "Scala" // types cannot be changed
+
+  // modify a variable in place
+  aVariable += 10 // aVariable = aVariable + 10
+
+  // increment/decrement operators don't exist in Scala
+  // aVariable++ // illegal in Scala
+
+  // loops
+  def testLoop(): Unit = {
+    var i = 0
+    while (i < 10) {
+      println(s"Counter at $i")
+      i += 1
+    }
+  }
+
+  /*
+    Imperative programming (loops/variables/mutable data) are not recommended:
+    - code becomes hard to read and understand (especially in growing code bases)
+    - vulnerable to concurrency problems (e.g. need for synchronization)
+
+    Imperative programming can help
+    - for performance-critical applications (0.1% of cases; Akka/ZIO/Cats are already quite fast)
+    - for interactions with Java libraries (usually mutable)
+
+    Using imperative programming in Scala for no good reason defeats the purpose of Scala.
+   */
+
+  val anExpression: Unit = aVariable += 10
+  val aLoop: Unit = while (aVariable < 130) {
+    println("counting more")
+    aVariable += 1
+  }
+
+  def main(args: Array[String]): Unit = {
+    testLoop()
+  }
+}
+```
