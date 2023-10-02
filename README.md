@@ -2637,3 +2637,50 @@ object ImperativeProgramming {
   }
 }
 ```
+
+## Contravariance and Covanriance
+
+Covariant +A allows you to use a more specific type (Box[String]) where a less specific type (Box[Any]).
+
+Covariant Example:
+
+class Child extends Parent
+
+```scala
+val child: Parent = new Child
+```
+
+In a covariant relationship, you can use a subtype where a supertype is expected. In this example, Child is a subtype of Parent, so you can assign an instance of Child to a variable of type Parent.
+
+------------------------------------------------------------------------------
+
+Contravariance -A allows you to use a more general type (Box[Any]) where a more specific type (Box[String]).
+
+Contravariant Example:
+
+class Parent extends Child
+
+```scala
+val parent: Child = new Parent
+```
+
+In a contravariant relationship, you can use a supertype where a subtype is expected. In this example, Parent is a supertype of Child, so you can assign an instance of Parent to a variable of type Child.
+
+-------------------------------------------------------------------------------
+
+### Summary: Covariance and contravariance
+
+```scala
+// Covariant Example
+val child: Parent = new Child
+
+// Contravariant Example
+val parent: Child = new Parent
+```
+
+In summary, the corrected code snippets demonstrate covariant and contravariant relationships in Scala, where a subtype is used where a supertype is expected (covariant) and a supertype is used where a subtype is expected (contravariant).
+
+
+
+
+
