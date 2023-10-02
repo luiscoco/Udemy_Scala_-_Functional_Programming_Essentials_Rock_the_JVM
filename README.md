@@ -2,7 +2,7 @@
 
 ## The Absolute Scala Basics
 
-1. Values, Variables and Types.
+### 1. Values, Variables and Types.
 
 ```scala
 package com.rockthejvm.part1basics
@@ -36,7 +36,7 @@ object ValuesAndTypes {
 }
 ```
 
-3. Expressions.
+### 2. Expressions.
 
 ```scala
 package com.rockthejvm.part1basics
@@ -102,17 +102,17 @@ object Expressions {
 }
 ```
 
-5. Functions.
+## 3. Functions.
    
-6. Type Inference.
+## 4. Type Inference.
 
-7. Recursion.
+## 5. Recursion.
 
-8. Call-by-Name and Call-by-Value.
+## 6. Call-by-Name and Call-by-Value.
 
-9. Default and Named Arguments.
+## 7. Default and Named Arguments.
 
-10. Smart Operations and Strings.
+## 8. Smart Operations and Strings.
 
 ## Object-Oriented Programming in Sala
 
