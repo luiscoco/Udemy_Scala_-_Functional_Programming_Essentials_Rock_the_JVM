@@ -440,37 +440,419 @@ object StringOps {
 
 ## 10. Object-Oriented Basics.
 
+```scala
+package com.rockthejvm.part2oop
 
+object OOBasics {
 
+  // classes
+  class Person(val name: String, age: Int) { // constructor signature
+    // fields
+    val allCaps = name.toUpperCase()
+
+    // methods
+    def greet(name: String): String =
+      s"${this.name} says: Hi, $name"
+
+    // signature differs
+    // OVERLOADING
+    def greet(): String =
+      s"Hi, everyone, my name is $name"
+
+    // aux constructor
+    def this(name: String) =
+      this(name, 0)
+
+    def this() =
+      this("Jane Doe")
+  }
+
+  val aPerson: Person = new Person("John", 26)
+  val john = aPerson.name // class parameter != field
+  val johnSayHiToDaniel = aPerson.greet("Daniel")
+  val johnSaysHi = aPerson.greet()
+  val genericPerson = new Person()
+
+  def main(args: Array[String]): Unit = {
+    val charlesDickens = new Writer("Charles", "Dickens", 1812)
+    val charlesDickensImpostor = new Writer("Charles", "Dickens", 2021)
+
+    val novel = new Novel("Great Expectations", 1861, charlesDickens)
+    val newEdition = novel.copy(1871)
+
+    println(charlesDickens.fullName)
+    println(novel.authorAge)
+    println(novel.isWrittenBy(charlesDickensImpostor)) // false
+    println(novel.isWrittenBy(charlesDickens)) // true
+    println(newEdition.authorAge)
+
+    val counter = new Counter()
+    counter.print() // 0
+    counter.increment().print() // 1
+    counter.increment() // always returns new instances
+    counter.print() // 0
+
+    counter.increment(10).print() // 10
+    counter.increment(20000).print() // 20000
+  }
+}
+
+/**
+  Exercise: imagine we're creating a backend for a book publishing house.
+  Create a Novel and a Writer class.
+
+  Writer: first name, surname, year
+    - method fullname
+
+  Novel: name, year of release, author
+    - authorAge
+    - isWrittenBy(author)
+    - copy (new year of release) = new instance of Novel
+ */
+
+class Writer(firstName: String, lastName: String, val yearOfBirth: Int) {
+  def fullName: String = s"$firstName $lastName"
+}
+
+class Novel(title: String, yearOfRelease: Int, val author: Writer) {
+  def authorAge: Int = yearOfRelease - author.yearOfBirth
+  def isWrittenBy(author: Writer): Boolean = this.author == author
+  def copy(newYear: Int): Novel = new Novel(title, newYear, author)
+}
+
+/**
+ * Exercise #2: an immutable counter class
+ * - constructed with an initial count
+ * - increment/decrement => NEW instance of counter
+ * - increment(n)/decrement(n) => NEW instance of counter
+ * - print()
+ *
+ * Benefits:
+ * + well in distributed environments
+ * + easier to read and understand code
+ */
+
+class Counter(count: Int = 0) {
+  def increment(): Counter =
+    new Counter(count + 1)
+
+  def decrement(): Counter =
+    if (count == 0) this
+    else new Counter(count - 1)
+
+  def increment(n: Int): Counter =
+    if (n <= 0) this
+    else increment().increment(n - 1) // vulnerable to SOs
+
+  def decrement(n: Int): Counter =
+    if (n <= 0) this
+    else decrement().decrement(n - 1)
+
+  def print(): Unit =
+    println(s"Current count: $count")
+}
+```
 
 ## 11. Object-Oriented Basics (exercises).
 
-
-
-
 ## 12. Syntactic Sugar: Method Notations.
 
+```scala
+package com.rockthejvm.part2oop
 
+import scala.language.postfixOps
 
+object MethodNotations {
+
+  class Person(val name: String, val age: Int, favoriteMovie: String) {
+    infix def likes(movie: String): Boolean =
+      movie == favoriteMovie
+
+    infix def +(person: Person): String =
+      s"${this.name} is hanging out with ${person.name}"
+
+    infix def +(nickname: String): Person =
+      new Person(s"$name ($nickname)", age, favoriteMovie)
+
+    infix def !!(progLanguage: String): String =
+      s"$name wonders how can $progLanguage be so cool!"
+
+    // prefix position
+    // unary ops: -, +, ~, !
+    def unary_- : String =
+      s"$name's alter ego"
+
+    def unary_+ : Person =
+      new Person(name, age + 1, favoriteMovie)
+
+    def isAlive: Boolean = true
+
+    def apply(): String =
+      s"Hi, my name is $name and I really enjoy $favoriteMovie"
+
+    def apply(n: Int): String =
+      s"$name watched $favoriteMovie $n times"
+  }
+
+  val mary = new Person("Mary", 34, "Inception")
+  val john = new Person("John", 36, "Fight Club")
+
+  val negativeOne = -1
+
+  /**
+   *  Exercises
+   *  - a + operator on the Person class that returns a person with a nickname
+   *    mary + "the rockstar" => new Person("Mary the rockstar", _, _)
+   *  - a UNARY + operator that increases the person's age
+   *    +mary => new Person(_, _, age + 1)
+   *  - an apply method with an int arg
+   *    mary.apply(2) => "Mary watched Inception 2 times"
+   */
+
+  def main(args: Array[String]): Unit = {
+    println(mary.likes("Fight Club"))
+    // infix notation - for methods with ONE argument
+    println(mary likes "Fight Club") // identical
+
+    // "operator" = plain method
+    println(mary + john)
+    println(mary.+(john)) // identical
+    println(2 + 3)
+    println(2.+(3)) // same
+    println(mary !! "Scala")
+
+    // prefix position
+    println(-mary)
+
+    // postfix notation
+    println(mary.isAlive)
+    println(mary isAlive) // discouraged
+
+    // apply is special
+    println(mary.apply())
+    println(mary()) // same
+
+    // exercises
+    val maryWithNickname = mary + "the rockstar"
+    println(maryWithNickname.name)
+
+    val maryOlder = +mary
+    println(maryOlder.age) // 35
+
+    println(mary(10))
+  }
+}
+```
 
 ## 13. Method Notations (excercises).
 
-
-
-
 ## 14. Scala objects.
 
+```scala
+package com.rockthejvm.part2oop
 
+object Objects {
 
+  object MySingleton { // type + the only instance of this type
+    val aField = 45
+    def aMethod(x: Int) = x + 1
+  }
+
+  val theSingleton = MySingleton
+  val anotherSingleton = MySingleton
+  val isSameSingleton = theSingleton == anotherSingleton // true
+  // objects can have fields and methods
+  val theSingletonField = MySingleton.aField
+  val theSingletonMethodCall = MySingleton.aMethod(99)
+
+  class Person(name: String) {
+    def sayHi(): String = s"Hi, my name is $name"
+  }
+
+  // companions = class + object with the same name in the same file
+  object Person { // companion object
+    // can access each other's private fields and methods
+    val N_EYES = 2
+    def canFly(): Boolean = false
+  }
+
+  // methods and fields in classes are used for instance-dependent functionality
+  val mary = new Person("Mary")
+  val mary_v2 = new Person("Mary")
+  val marysGreeting = mary.sayHi()
+  mary == mary
+
+  // methods and fields in objects are used for instance-independent functionality - "static"
+  val humansCanFly = Person.canFly()
+  val nEyesHuman = Person.N_EYES
+
+  // equality
+  // 1 - equality of reference - usually defined as ==
+  val sameMary = mary eq mary_v2 // false, different instances
+  val sameSingleton = MySingleton eq MySingleton // true
+  // 2 - equality of "sameness" - in Java defined as .equals
+  val sameMary_v2 = mary equals mary_v2 // false
+  val sameMary_v3 = mary == mary_v2 // same as equals - false
+  val sameSingleton_v2 = MySingleton == MySingleton // true
+
+  // objects can extend classes
+  object BigFoot extends Person("Big Foot")
+
+  //
+  /*
+    Scala application:
+      object Objects {
+        def main(args: Array[String]): Unit = { ... }
+      }
+
+    Equivalent Java application:
+      public class Objects {
+        public static void main(String[] args) { ... }
+      }
+   */
+  def main(args: Array[String]): Unit = {
+    println(sameMary_v3)
+  }
+}
+```
 
 ## 15. Inheritance.
 
+```scala
+package com.rockthejvm.part2oop
 
+object Inheritance {
 
+  class Animal {
+    val creatureType = "wild"
+    def eat(): Unit = println("nomnomnom")
+  }
+
+  class Cat extends Animal { // a cat "is an" animal
+    def crunch() = {
+      eat()
+      println("crunch, crunch")
+    }
+  }
+
+  val cat = new Cat
+
+  class Person(val name: String, age: Int) {
+    def this(name: String) = this(name, 0)
+  }
+
+  class Adult(name: String, age: Int, idCard: String) extends Person(name) // must specify super-constructor
+
+  // overriding
+  class Dog extends Animal {
+    override val creatureType = "domestic"
+    override def eat(): Unit = println("mmm, I like this bone")
+
+    // popular overridable method
+    override def toString: String = "a dog"
+  }
+
+  // subtype polymorphism
+  val dog: Animal = new Dog
+  dog.eat() // the most specific method will be called
+
+  // overloading vs overriding
+  class Crocodile extends Animal {
+    override val creatureType = "very wild"
+    override def eat(): Unit = println("I can eat anything, I'm a croc")
+
+    // overloading: multiple methods with the same name, different signatures
+    // different signature =
+    //    different argument list (different number of args + different arg types)
+    //    + different return type (optional)
+    def eat(animal: Animal): Unit = println("I'm eating this poor fella")
+    def eat(dog: Dog): Unit = println("eating a dog")
+    def eat(person: Person): Unit = println(s"I'm eating a human with the name ${person.name}")
+    def eat(person: Person, dog: Dog): Unit = println("I'm eating a human AND the dog")
+    // def eat(): Int = 45 // not a valid overload
+    def eat(dog: Dog, person: Person): Unit = println("I'm eating a human AND the dog")
+
+  }
+
+  def main(args: Array[String]): Unit = {
+    println(dog) // println(dog.toString)
+
+  }
+}
+```
 
 ## 16. Inheritance, continued: Abstract Classes and Traits.
 
+```scala
+package com.rockthejvm.part2oop
 
+object AbstractDataTypes {
+
+  abstract class Animal {
+    val creatureType: String // abstract
+    def eat(): Unit
+    // non-abstract fields/methods allowed
+    def preferredMeal: String = "anything" // "accessor methods"
+  }
+
+  // abstract classes can't be instantiated
+  // val anAnimal: Animal = new Animal
+
+  // non-abstract classes must implement the abstract fields/methods
+  class Dog extends Animal {
+    override val creatureType = "domestic"
+    override def eat(): Unit = println("crunching this bone")
+    // overriding is legal for everything
+    override val preferredMeal: String = "bones" // overriding accessor method with a field
+  }
+
+  val aDog: Animal = new Dog
+
+  // traits
+  trait Carnivore { // Scala 3 - traits can have constructor args
+    def eat(animal: Animal): Unit
+  }
+
+  class TRex extends Carnivore {
+    override def eat(animal: Animal): Unit = println("I'm a T-Rex, I eat animals")
+  }
+
+  // practical difference abstract classes vs traits
+  // one class inheritance
+  // multiple traits inheritance
+  trait ColdBlooded
+  class Crocodile extends Animal with Carnivore with ColdBlooded {
+    override val creatureType = "croc"
+    override def eat(): Unit = println("I'm a croc, I just crunch stuff")
+    override def eat(animal: Animal): Unit = println("croc eating animal")
+  }
+
+  /*
+    philosophical difference abstract classes vs traits
+    - abstract classes are THINGS
+    - traits are BEHAVIORS
+   */
+
+  /*
+    Any
+      AnyRef
+        All classes we write
+          scala.Null (the null reference)
+      AnyVal
+        Int, Boolean, Char, ...
+
+
+          scala.Nothing
+   */
+
+  val aNonExistentAnimal: Animal = null
+  val anInt: Int = throw new NullPointerException
+
+  def main(args: Array[String]): Unit = {
+
+  }
+}
+```
 
 
 ## 17. Inheritance exercises: implementing our own Collection.
@@ -479,12 +861,153 @@ object StringOps {
 
 ## 18. Generics.
 
+```scala
+package com.rockthejvm.part2oop
 
+object Generics {
+
+  // goal: reuse code on different types
+
+  // option 1: copy the code
+  abstract class IntList {
+    def head: Int
+    def tail: IntList
+  }
+  class EmptyIntList extends IntList {
+    override def head = throw new NoSuchElementException
+    override def tail = throw new NoSuchElementException
+  }
+  class NonEmptyIntList(override val head: Int, override val tail: IntList) extends IntList
+
+  abstract class StringList {
+    def head: String
+    def tail: StringList
+  }
+  class EmptyStringList extends StringList {
+    override def head = throw new NoSuchElementException
+    override def tail = throw new NoSuchElementException
+  }
+  class NonEmptyStringList(override val head: String, override val tail: StringList) extends StringList
+  // ... and so on for all the types you want to support
+  /*
+    Pros:
+    - keeps type safety: you know which list holds which kind of elements
+    Cons:
+    - boilerplate
+    - unsustainable
+    - copy/paste... really?
+   */
+
+  // option 2: make the list hold a big, parent type
+  abstract class GeneralList {
+    def head: Any
+    def tail: GeneralList
+  }
+  class EmptyGeneralList extends GeneralList {
+    override def head = throw new NoSuchElementException
+    override def tail = throw new NoSuchElementException
+  }
+  class NonEmptyGeneralList(override val head: Any, override val tail: GeneralList) extends GeneralList
+  /*
+    Pros:
+    - no more code duplication
+    - can support any type
+    Cons:
+    - lost type safety: can make no assumptions about any element or method
+    - can now be heterogeneous: can hold cats and dogs in the same list (not funny)
+   */
+
+  // solution: make the list generic with a type argument
+  abstract class MyList[A] { // "generic" list; Java equivalent: abstract class MyList<A>
+    def head: A
+    def tail: MyList[A]
+  }
+
+  class Empty[A] extends MyList[A] {
+    override def head: A = throw new NoSuchElementException
+    override def tail: MyList[A] = throw new NoSuchElementException
+  }
+
+  class NonEmpty[A](override val head: A, override val tail: MyList[A]) extends MyList[A]
+
+  // can now use a concrete type argument
+  val listOfIntegers: MyList[Int] = new NonEmpty[Int](1, new NonEmpty[Int](2, new Empty[Int]))
+
+  // compiler now knows the real type of the elements
+  val firstNumber = listOfIntegers.head
+  val adding = firstNumber + 3
+
+  // multiple type arguments
+  trait MyMap[Key, Value]
+
+  // generic methods
+  object MyList {
+    def from2Elements[A](elem1: A, elem2: A): MyList[A] =
+      new NonEmpty[A](elem1, new NonEmpty[A](elem2, new Empty[A]))
+  }
+
+  // calling methods
+  val first2Numbers = MyList.from2Elements[Int](1, 2)
+  val first2Numbers_v2 = MyList.from2Elements(1, 2) // compiler can infer generic type from the type of the arguments
+  val first2Numbers_v3 = new NonEmpty(1, new NonEmpty(2, new Empty))
+
+  /**
+   * Exercise: genericize LList.
+   */
+
+  def main(args: Array[String]): Unit = {
+
+  }
+}
+```
 
 
 ## 19. Anonymous Classes.
 
+```scala
+package com.rockthejvm.part2oop
 
+object AnonymousClasses {
+
+  abstract class Animal {
+    def eat(): Unit
+  }
+
+  // classes used for just one instance are boilerplate-y
+  class SomeAnimal extends Animal {
+    override def eat(): Unit = println("I'm a weird animal")
+  }
+
+  val someAnimal = new SomeAnimal
+
+  val someAnimal_v2 = new Animal { // anonymous class
+    override def eat(): Unit = println("I'm a weird animal")
+  }
+
+  /*
+    equivalent with:
+
+    class AnonymousClasses.AnonClass$1 extends Animal {
+      override def eat(): Unit = println("I'm a weird animal")
+    }
+
+    val someAnimal_v2 = new AnonymousClasses.AnonClass$1
+   */
+
+  // works for classes (abstract or not) + traits
+  class Person(name: String) {
+    def sayHi(): Unit = println(s"Hi, my name is $name")
+  }
+
+  val jim = new Person("Jim") {
+    override def sayHi(): Unit = println("MY NAME IS JIM!")
+  }
+
+  def main(args: Array[String]): Unit = {
+
+  }
+}
+```
 
 
 ## 20. Object-oriented exercises: expanding our Collection.
