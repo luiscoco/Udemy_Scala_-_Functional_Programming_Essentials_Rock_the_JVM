@@ -438,64 +438,146 @@ object StringOps {
 
 ## Object-Oriented Programming in Scala
 
-10. Object-Oriented Basics.
+## 10. Object-Oriented Basics.
 
-11. Object-Oriented Basics (exercises).
 
-12. Syntactic Sugar: Method Notations.
 
-13. Method Notations (excercises).
 
-14. Scala objects.
+## 11. Object-Oriented Basics (exercises).
 
-15. Inheritance.
 
-16. Inheritance, continued: Abstract Classes and Traits.
 
-17. Inheritance exercises: implementing our own Collection.
 
-18. Generics.
+## 12. Syntactic Sugar: Method Notations.
 
-19. Anonymous Classes.
 
-20. Object-oriented exercises: expanding our Collection.
 
-21. Case Classes.
 
-22. Scala 3: Enums.
+## 13. Method Notations (excercises).
 
-23. Exceptions.
 
-24. Packing and Imports.
+
+
+## 14. Scala objects.
+
+
+
+
+## 15. Inheritance.
+
+
+
+
+## 16. Inheritance, continued: Abstract Classes and Traits.
+
+
+
+
+## 17. Inheritance exercises: implementing our own Collection.
+
+
+
+## 18. Generics.
+
+
+
+
+## 19. Anonymous Classes.
+
+
+
+
+## 20. Object-oriented exercises: expanding our Collection.
+
+
+
+## 21. Case Classes.
+
+
+
+
+## 22. Scala 3: Enums.
+
+
+
+
+## 23. Exceptions.
+
+
+
+
+## 24. Packing and Imports.
+
+
+
 
 ## Functional Programming in Scala
 
-25. What's a Function?
+## 25. What's a Function?
 
-26. Anonymous Functions.
+
+
+## 26. Anonymous Functions.
+
+
 
 27. Higher-Order-Functions and Curries.
 
+
+
 28. HOFs and Curries (exercises).
+
+
+
 
 29. map, flatMap, filter and for-comprehensions.
 
+
+
+
 30. A Collections Overview.
+
+
+
 
 31. Sequences: List, Array, Vector.
 
+
+
+
 32. Tuples and Maps.
+
+
+
 
 33. Tuples and Maps (execises).
 
+
+
+
 34. Options.
 
+
+
+
 35. Handling Failure.
+
+
+
 
 ## Pattern Matching
 
 36. Pattern Matching.
 
+
+
+
 37. All the patterns.
 
+
+
+
+
 38. Scala 3: braceless syntax.
+
+
