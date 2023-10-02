@@ -38,7 +38,7 @@ object ValuesAndTypes {
 
 3. Expressions.
 
-´´´scala
+```scala
 package com.rockthejvm.part1basics
 
 object Expressions {
@@ -100,7 +100,7 @@ object Expressions {
     println(yetAnotherValue) // Scala, ()
   }
 }
-´´´
+```
 
 5. Functions.
    
